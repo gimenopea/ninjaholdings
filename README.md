@@ -12,11 +12,14 @@ Design a data warehouse schema in Snowflake and implement dbt transformations to
   - [Time Based Analytics](#3-time-based-analytics)
 - [Analytic Warehouse Audit/Governance Considerations](#data-governance-considerations-quality--auditability)
 - [DBT Project Setup](#dbt-project-setup)
-  -[Project YAML](#dbt_projectyml)
+  - [Project YAML](#dbt_projectyml)
 - [dim_customer.sql model](#dim_customersql-model)
 - [fact_payments.sql model](#fact_paymentssql-model)
 - [Model tests](#testing-on-ninja_lendingyml)
 - [Singular test](#singular-test-on-payments-non_negative_paymentssql)
+- [Why Project Structure is Scalable](#why-the-project-structure-is-scalable)
+- [Data Pipeline Considerations](#data-pipeline-considerations)
+
 
 ## application schema: 
 
@@ -27,6 +30,8 @@ Design a data warehouse schema in Snowflake and implement dbt transformations to
 
 ![Warehouse Schema](images/warehouse_schema.png)
 
+**<h1> [top](#table-of-contents) </h1>**
+
 ## Why This Star Schema Answers the Required Analytics
 
 In particular, this design can address the following query profiles (with examples):
@@ -36,6 +41,8 @@ In particular, this design can address the following query profiles (with exampl
 - Customer segmentation (e.g., by loan amount, repayment behavior)
 
 - Time-based analysis (e.g., loans disbursed by month, payment trends)
+
+**<h1> [top](#table-of-contents) </h1>**
 
 ### Design considerations
 Schema (grain):
@@ -52,6 +59,9 @@ dim_payment_type
 dim_loan_application
 
 This Kimball star is built so that measures live in facts and slicing attributes live in dimensions (date, customer, status, type). This separation lets us work with simple, performant star joins and predictable grains.
+
+
+**<h1> [top](#table-of-contents) </h1>**
 
 #### Examples:
 
@@ -92,6 +102,10 @@ GROUP BY 1,2
 ORDER BY 1,2;
 
 ```
+
+
+
+**<h1> [top](#table-of-contents) </h1>**
 
 
 ### 2. Customer Segmentation
@@ -141,6 +155,10 @@ ORDER BY 1,2;
 
 ```
 
+
+**<h1> [top](#table-of-contents) </h1>**
+
+
 ### 3. Time based analytics
 
 <img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
@@ -175,9 +193,17 @@ GROUP BY 1
 ORDER BY 1;
 ```
 
+
+**<h1> [top](#table-of-contents) </h1>**
+
+
 ## Data Governance Considerations (Quality & Auditability)
 
 In this design, data quality and transparency are built in from the start. Each table uses clear keys and relationships so that facts always tie back to the right dimensions, and important fields are required (no unexpected nulls). All surrogate keys are declared with primary/unique constraints and dimensions enforce not_null tests on business keys. This makes sure that referential integrity between facts and dimensions. For customers, we track scd changes with effective dates and a “current” flag, so we never lose sight of historical details when someone’s information changes. Facts like loans and payments are treated as immutable events, but we allow for “unknown” placeholder values so late-arriving records don’t break the pipeline. Tests are already incorporated against the dbt models and sources. While lineage metadata is preserved in staging and intermediate models, runtime audit attributes (such as pipeline run IDs, batch identifiers, or dbt invocation IDs) are intentionally not included in the base column design of fact and dimension tables. The decision to embed these fields depends heavily on the ingestion architecture and governance requirements of the organization. For example, a pipeline run ID may be meaningful in a tightly controlled ETL platform, but less useful if the ingestion engine changes frequently or if multiple tools are orchestrating data movement. These runtime attributes are better maintained as part of operational logs or orchestration metadata rather than embedded directly into the analytic schema. Overall, simplicity and narrow fact tables are better but audit columns depends on the scenario/current environment.
+
+
+
+**<h1> [top](#table-of-contents) </h1>**
 
 
 ## DBT project Setup
@@ -222,6 +248,8 @@ In this design, data quality and transparency are built in from the start. Each 
 ```
 
 
+**<h1> [top](#table-of-contents) </h1>**
+
 ### dbt_project.yml
 
 ```yaml
@@ -245,8 +273,14 @@ models:
           +incremental_strategy: insert_overwrite
           +on_schema_change: append_new_columns
 ```
+
+**<h1> [top](#table-of-contents) </h1>**
+
+
 ### dim_customer.sql model
 ```sql
+
+
 
 --{{ config(materialized='table') }} note that this can be broadly defined across all /marts models
 
@@ -274,6 +308,8 @@ from {{ ref('snap_customers') }}
 -- select * from {{ ref('stg_customers') }}
 -- {% endsnapshot %}
 ```
+**<h1> [top](#table-of-contents) </h1>**
+
 
 ### fact_payments.sql model
 
@@ -335,7 +371,7 @@ left join {{ ref('dim_payment_type') }} t
   on t.payment_type_bk = k.payment_type_bk
 
 ```
-
+**<h1> [top](#table-of-contents) </h1>**
 ### Testing on ninja_lending.yml 
 
 ```yaml
@@ -384,7 +420,7 @@ models:
           - not_null
 ```
 
-
+**<h1> [top](#table-of-contents) </h1>**
 ### Singular test on payments. non_negative_payments.sql 
 
 ```sql
@@ -395,14 +431,15 @@ from {{ ref('fct_payments') }}
 where payment_amount <= 0
 limit 1
 ```
-
+**<h1> [top](#table-of-contents) </h1>**
 ### Why the project structure is scalable
 - SCD updates in dim_customer is handled without macros and uses snapshots. This is an option that can give clear history and can be fairly straightforward to test
 - Due to dimensional modeling and tests, we retain referential integrity between dimensions and facts. fact tables, like fact_payments avoids attribute drift in this approach and keeps the fact table narrow
 - We make use of templating to reference models and handle lineage through refering stage tables and source tables. staging tables are referenced from defined source tables. This allows us to parameterize database connections, schemas without having to touch all assets in the project.
 - by modularizing our reference with use of macros, and use of templates, we it is easy to do lift and shift changes across different environments and deployments 
 
-### Data Pipeline considersations
+**<h1> [top](#table-of-contents) </h1>**
+### Data Pipeline considerations
 
 From my own personal professional experience, data can be consistently moved from source application and into snowflake three different ways
 
