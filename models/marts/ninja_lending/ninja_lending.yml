@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: "SCD2 customer dimension (snapshots)."
+    columns:
+      - name: customer_sk
+        tests: [not_null, unique]
+      - name: customer_bk
+        tests: [not_null, unique]
+      - name: is_current
+        tests:
+          - accepted_values: {values: [true, false]}
+
+  - name: dim_date
+    columns:
+      - name: date_sk
+        tests: [not_null, unique]
+      - name: calendar_date
+        tests: [not_null, unique]
+
+  - name: dim_loan_status
+    columns:
+      - name: loan_status_sk
+        tests: [not_null, unique]
+
+  - name: dim_payment_type
+    columns:
+      - name: payment_type_sk
+        tests: [not_null, unique]
+
+  - name: dim_loan_application
+    columns:
+      - name: application_sk
+        tests: [not_null, unique]
+      - name: customer_sk
+        tests:
+          - relationships: {to: ref('dim_customer'), field: customer_sk}
+
+  - name: fct_loans
+    description: "One row per approved/disbursed loan."
+    columns:
+      - name: loan_sk
+        tests: [not_null, unique]
+      - name: customer_sk
+        tests:
+          - relationships: {to: ref('dim_customer'), field: customer_sk}
+      - name: disbursement_date_sk
+        tests:
+          - relationships: {to: ref('dim_date'), field: date_sk}
+      - name: current_status_sk
+        tests:
+          - relationships: {to: ref('dim_loan_status'), field: loan_status_sk}
+
+  - name: fct_payments
+    description: "One row per payment event."
+    columns:
+      - name: payment_sk
+        tests: [not_null, unique]
+      - name: loan_sk
+        tests:
+          - relationships: {to: ref('fct_loans'), field: loan_sk}
+      - name: customer_sk
+        tests:
+          - relationships: {to: ref('dim_customer'), field: customer_sk}
+      - name: payment_date_sk
+        tests:
+          - relationships: {to: ref('dim_date'), field: date_sk}
+      - name: payment_amount
+        tests: [not_null]

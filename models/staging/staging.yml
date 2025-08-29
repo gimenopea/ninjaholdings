@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_customers
+    columns:
+      - name: customer_sk
+        tests: [not_null, unique]
+      - name: customer_bk
+        tests: [not_null]
+
+  - name: stg_loan_applications
+    columns:
+      - name: application_sk
+        tests: [not_null, unique]
+      - name: application_bk
+        tests: [not_null]
+      - name: loan_amount_requested
+        tests: [not_null]
+
+  - name: stg_loans
+    columns:
+      - name: loan_sk
+        tests: [not_null, unique]
+      - name: loan_bk
+        tests: [not_null]
+      - name: loan_amount
+        tests: [not_null]
+
+  - name: stg_payments
+    columns:
+      - name: payment_sk
+        tests: [not_null, unique]
+      - name: payment_bk
+        tests: [not_null]
+      - name: payment_amount
+        tests: [not_null]
