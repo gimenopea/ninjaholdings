@@ -28,7 +28,7 @@ Design a data warehouse schema in Snowflake and implement dbt transformations to
 
 ## datawarehouse schema: 
 
-![Warehouse Schema](images/warehouse.svg)
+![Warehouse Schema](images/warehouse_schema.png)
 
 **<h1> [top](#table-of-contents) </h1>**
 
@@ -67,7 +67,7 @@ This Kimball star is built so that measures live in facts and slicing attributes
 
 ### 1. Loan performance
 
-<img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
+<img src="images/warehouse_schema.png" alt="Schema Diagram" width="850" height="850">
 
 ```sql
 -- Total loans disbursed by month
@@ -110,7 +110,7 @@ ORDER BY 1,2;
 
 ### 2. Customer Segmentation
 
-<img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
+<img src="images/warehouse_schema.png" alt="Schema Diagram" width="850" height="850">
 
 ```sql
 -- Customers by approved amount bucket vs repayment behavior
