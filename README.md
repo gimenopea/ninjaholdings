@@ -28,7 +28,7 @@ Design a data warehouse schema in Snowflake and implement dbt transformations to
 
 ## datawarehouse schema: 
 
-![Warehouse Schema](images/warehouse_schema.png)
+![Warehouse Schema](images/warehouse.svg)
 
 **<h1> [top](#table-of-contents) </h1>**
 
