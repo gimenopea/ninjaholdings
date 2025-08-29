@@ -2,6 +2,16 @@
 
 Design a data warehouse schema in Snowflake and implement dbt transformations to model the lending concept for analytics and reporting.
 
+
+# Table of contents
+- [Application Schema](#application-schema)
+- [Warehouse Schema](#application-schema)
+- [Why This Star Schema Answers the Required Analytics](#why-this-star-schema-answers-the-required-analytics)
+  - [Loan Performance](#1-loan-performance)
+  - [Customer Segmentation](#2-customer-segmentation)
+  - [Time Based Analytics](#3-time-based-analytics)
+- [Analytic Warehouse Audit/Governance Considerations](#data-governance-considerations-quality--auditability)
+
 ## application schema: 
 
 ![App Schema](images/application_schema.png)
@@ -39,7 +49,7 @@ This Kimball star is built so that measures live in facts and slicing attributes
 
 #### Examples:
 
-1. Loan performance
+### 1. Loan performance
 
 <img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
 
@@ -78,7 +88,7 @@ ORDER BY 1,2;
 ```
 
 
-2. Customer Segmentation
+### 2. Customer Segmentation
 
 <img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
 
@@ -125,7 +135,7 @@ ORDER BY 1,2;
 
 ```
 
-3. Time based analytics
+### 3. Time based analytics
 
 <img src="images/warehouse.svg" alt="Schema Diagram" width="850" height="850">
 
